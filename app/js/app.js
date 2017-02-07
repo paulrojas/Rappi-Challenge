@@ -7,9 +7,12 @@ var APP = {
 
     var loader = new THREE.ObjectLoader();
     var camera, scene, renderer, N=4;
-    var controls, effect, cameraVR, isVR;
+    var controls, effect, cameraVR, isVR, raycaster;
+    var mouse = new THREE.Vector2(), INTERSECTED;
     var events = {};
     this.dom = document.getElementById( 'scene' );
+    this.elements = [];
+    var group;
 
     this.width = this.dom.clientWidth;
     this.height = this.dom.clientHeight;
@@ -18,7 +21,7 @@ var APP = {
       isVR = json.project.vr;
 
       renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, canvas: this.dom } );
-      renderer.setClearColor( 0xf0f0f0 );
+      renderer.setClearColor( 0xf0f0f0, 1 );
       renderer.setPixelRatio( window.devicePixelRatio );
 
       if ( json.project.gammaInput ) renderer.gammaInput = true;
@@ -26,16 +29,13 @@ var APP = {
 
       if ( json.project.shadows ) {
         renderer.shadowMap.enabled = true;
-        // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       }
-
-      //this.dom.appendChild( renderer.domElement );
 
       this.setScene( loader.parse( json.scene ) );
       this.setCamera( loader.parse( json.camera ) );
-      this.initGui();
 
       scene.background = new THREE.Color( 0xf0f0f0 );
+      raycaster = new THREE.Raycaster();
 
       controls = new THREE.TrackballControls( camera );
       controls.rotateSpeed = 1.0;
@@ -46,7 +46,10 @@ var APP = {
       controls.staticMoving = true;
       controls.dynamicDampingFactor = 0.3;
       controls.keys = [ 65, 83, 68 ];
-      controls.addEventListener( 'change', renderer );
+
+      camera.position.x = 14.727889988750304;
+      camera.position.y = -0.6378274967080255;
+      camera.position.z = 8.070858033471538;
 
       events = {
         init: [],
@@ -68,21 +71,27 @@ var APP = {
       box.scale.multiplyScalar( 0.85 );
       scene.remove( box );
 
-      var group = new THREE.Group();
+      group = new THREE.Group();
       scene.add( group );
 
-      for ( var x = 0; x < N; x++ ) {
-        for ( var y = 0; y < N; y++ ) {
-          for ( var z = 0; z < N; z++ ) {
+      for ( var x = 1; x <= N; x++ ) {
+        this.elements[x] = [];
+        for ( var y = 1; y <= N; y++ ) {
+          this.elements[x][y] = [];
+          for ( var z = 1; z <= N; z++ ) {
             var clone = box.clone();
             clone.material = box.material.clone();
-            clone.position.x = x * 2 - 5.5;
-            clone.position.y = y * 2 - 5.5;
-            clone.position.z = z * 2 - 5.5;
-            group.add( clone );
+            clone.position.x = (x-1) * 2;
+            clone.position.y = -(y-1) * 2;
+            clone.position.z = -(z-1) * 2;
+            clone['tag'] = { x: x, y: y, z: z }
+            this.elements[x][y][z] = { box: clone, value: 0 };
+            group.add( this.elements[x][y][z].box );
           }
         }
-      }      
+      }
+      this.elements[1][1][1].box.material.emissive.setHex( 0x00ff00 );
+      this.elements[N][N][N].box.material.emissive.setHex( 0x0000ff );
       dispatch( events.init, arguments );
     };
 
@@ -94,6 +103,9 @@ var APP = {
 
     this.setScene = function ( value ) {
       scene = value;
+      scene.background = new THREE.Color( 0xf0f0f0 );
+      var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+      scene.add( light );
     };
 
     this.setSize = function ( width, height ) {
@@ -126,14 +138,31 @@ var APP = {
       } catch ( e ) {
         console.error( ( e.message || e ), ( e.stack || "" ) );
       }
+  
+      //camera.updateMatrixWorld();
+      raycaster.setFromCamera( mouse, camera );
+      var intersects = raycaster.intersectObjects( group.children );
+      if ( intersects.length > 0 ) {
+        if ( INTERSECTED != intersects[ 0 ].object ) {
+          if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-      renderer.render( scene, camera );
+          INTERSECTED = intersects[ 0 ].object;
+          INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+          INTERSECTED.material.emissive.setHex( 0xff0000 );
+          document.getElementById("X").innerText = INTERSECTED['tag'].x;
+          document.getElementById("Y").innerText = INTERSECTED['tag'].y;
+          document.getElementById("Z").innerText = INTERSECTED['tag'].z;
+        }
+      } else {
+        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+        INTERSECTED = null;
+      }
       try {
         controls.update();
-      } catch(ex) {
+      } catch (ex) { 
 
       }
-      
+      renderer.render( scene, camera );
       prevTime = time;
     }
 
@@ -177,67 +206,6 @@ var APP = {
       renderer = undefined;
     };
 
-    this.initGui = function() {
-      var gui = new dat.GUI( { width: 280 } );
-      var inputs = new function () {
-        this.rotationSpeed = 0.02;
-        this.bouncingSpeed = 0.03;
-      };
-      gui.add(inputs, 'rotationSpeed', 0, 0.5);
-      gui.add(inputs, 'bouncingSpeed', 0, 0.5);
-
-      var api = {
-        'mode': 0,
-        'transparent_objects': false
-      };
-
-      var folder = gui.addFolder( 'menu' );
-
-      folder.add( api, 'mode', {
-
-        'classic': 0,
-        'light pre-pass': 1,
-        'forward': 2
-
-      } ).onChange( function() {
-
-        switch( parseInt( api.mode ) ) {
-
-          case 0:
-            renderer.forwardRendering = false;
-            renderer.enableLightPrePass( false );
-            break;
-
-          case 1:
-            renderer.forwardRendering = false;
-            renderer.enableLightPrePass( true );
-            break;
-
-          case 2:
-            renderer.forwardRendering = true;
-            break;
-
-          default:
-            break;
-
-        }
-
-      } );
-
-      folder.add( api, 'transparent_objects' ).onChange( function () {
-
-        for ( var i = 0, il = transparentObjects.length; i < il; i ++ ) {
-
-          transparentObjects[ i ].visible = api[ 'transparent_objects' ];
-
-        }
-
-      } );
-
-      folder.open();
-
-    }
-
     function onDocumentKeyDown( event ) {
       dispatch( events.keydown, event );
     }
@@ -255,6 +223,9 @@ var APP = {
     }
 
     function onDocumentMouseMove( event ) {
+      event.preventDefault();
+      mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
       dispatch( events.mousemove, event );
     }
 

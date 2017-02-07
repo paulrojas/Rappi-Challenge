@@ -14,6 +14,14 @@
         margin: 0px;
       }
       canvas { background-color: #f0f0f0; width: 100%; height: 100% }
+      #info {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 250px;
+        height: 250px;
+        background-color: #cccccc;
+      }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
     <script src="./js/dat.gui.min.js"></script>
@@ -21,10 +29,24 @@
     <script src="./js/app.js"></script>
   </head>
   <body ontouchstart="">
+    <div id="info">
+      <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">X</div>
+        <div id="X" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
+      </div>
+      <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">Y</div>
+        <div id="Y" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
+      </div>
+      <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">Z</div>
+        <div id="Z" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
+      </div>
+    </div>
     <canvas id="scene"></canvas>
     
     <script>
-      var loader = new THREE.XHRLoader();
+      var loader = new THREE.FileLoader();
       loader.load( './js/app.json', function ( text ) {
         var json = JSON.parse( text );
         var my_canvas = document.getElementById( 'scene' );
