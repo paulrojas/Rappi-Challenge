@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #fff;
+        margin: 0px;
+        overflow: hidden;
+      }
+
+      #canvas {
+        background-color: #000;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        margin: 0px;
+        padding: 0px;
+        position: relative; /* fixed or static */
+      }
+    </style>
+    <script src="http://threejs.org/build/three.min.js"></script>
+  </head>
+  <body>
+    
+    <div class="row">
+      <!-- Menu ubicado a la derecha -->
+      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        
+      </div>
+
+      <!-- Area del canvas -->
+      <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+        <div id="canvas">
+        </div>
+      </div>
+      
+    </div>
+    
+    <input type="number" value=4>
+  </body>
+  <script src="./js/app2.js"></script>
+</html>

@@ -42,16 +42,20 @@
         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">Z</div>
         <div id="Z" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
       </div>
+      <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">W</div>
+        <div id="W" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
+      </div>
     </div>
     <canvas id="scene"></canvas>
     
     <script>
+      var my_canvas, player;
       var loader = new THREE.FileLoader();
       loader.load( './js/app.json', function ( text ) {
         var json = JSON.parse( text );
         var my_canvas = document.getElementById( 'scene' );
-
-        var player = new APP.Player();
+        player = new APP.Player();
         player.load( json );
         player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
         player.play();
@@ -61,6 +65,10 @@
         window.addEventListener( 'resize', function () {
           player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
         } );
+
+        window.onload = function() {
+          player.setGUI();
+        }
       } );
     </script>
   </body>

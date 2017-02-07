@@ -1,3 +1,25 @@
+var GUIParams = function() {
+  this.N = 4;
+  this.x = 1;
+  this.y = 1;
+  this.z = 1;
+  this.W = 0;
+  this.x1 = 1;
+  this.y1 = 1;
+  this.z1 = 1;
+  this.x2 = 1;
+  this.y2 = 1;
+  this.z2 = 1;
+  this.updateValue = function(){
+    player.elements[this.x][this.y][this.z].value = this.W;
+    player.elements[this.x][this.y][this.z].box.material.emissive.setHex( 0x00ffff );
+  };
+  this.queryValue = function() {
+
+  }
+};
+
+var gui, param;
 
 var APP = {
 
@@ -7,19 +29,17 @@ var APP = {
 
     var loader = new THREE.ObjectLoader();
     var camera, scene, renderer, N=4;
-    var controls, effect, cameraVR, isVR, raycaster;
+    var controls, effect, raycaster;
     var mouse = new THREE.Vector2(), INTERSECTED;
     var events = {};
     this.dom = document.getElementById( 'scene' );
     this.elements = [];
-    var group;
+    var group, box;
 
     this.width = this.dom.clientWidth;
     this.height = this.dom.clientHeight;
 
     this.load = function ( json ) {
-      isVR = json.project.vr;
-
       renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, canvas: this.dom } );
       renderer.setClearColor( 0xf0f0f0, 1 );
       renderer.setPixelRatio( window.devicePixelRatio );
@@ -37,7 +57,7 @@ var APP = {
       scene.background = new THREE.Color( 0xf0f0f0 );
       raycaster = new THREE.Raycaster();
 
-      controls = new THREE.TrackballControls( camera );
+      controls = new THREE.TrackballControls( camera, this.dom );
       controls.rotateSpeed = 1.0;
       controls.zoomSpeed = 1.2;
       controls.panSpeed = 0.8;
@@ -66,32 +86,13 @@ var APP = {
         update: []
       };
       
-      var box = scene.getObjectByName( 'Box' );
+      box = scene.getObjectByName( 'Box' );
       box.material.roughnessMap.magFilter = THREE.NearestFilter;
       box.scale.multiplyScalar( 0.85 );
       scene.remove( box );
 
-      group = new THREE.Group();
-      scene.add( group );
+      this.changeMatrixSize();
 
-      for ( var x = 1; x <= N; x++ ) {
-        this.elements[x] = [];
-        for ( var y = 1; y <= N; y++ ) {
-          this.elements[x][y] = [];
-          for ( var z = 1; z <= N; z++ ) {
-            var clone = box.clone();
-            clone.material = box.material.clone();
-            clone.position.x = (x-1) * 2;
-            clone.position.y = -(y-1) * 2;
-            clone.position.z = -(z-1) * 2;
-            clone['tag'] = { x: x, y: y, z: z }
-            this.elements[x][y][z] = { box: clone, value: 0 };
-            group.add( this.elements[x][y][z].box );
-          }
-        }
-      }
-      this.elements[1][1][1].box.material.emissive.setHex( 0x00ff00 );
-      this.elements[N][N][N].box.material.emissive.setHex( 0x0000ff );
       dispatch( events.init, arguments );
     };
 
@@ -122,6 +123,39 @@ var APP = {
       }
     };
 
+    this.setGUI = function() {
+      gui = new dat.GUI();
+
+      param = new GUIParams();
+      var f1 = gui.addFolder('Tamaño del cubo');
+      f1.add(param, 'N').min(2).max(20).step(1).onFinishChange( function(value){
+        if (N != value) {
+          if (confirm('Esta seguro de cambiar el tamaño del cubo. Si continúa se eliminarán todos los valores.')) {
+            N = value;
+            scope.changeMatrixSize();
+          } else {
+            param.N = N;
+            value = N;
+          }
+        }
+      }).listen();
+
+      var f2 = gui.addFolder('Update');
+      f2.add(param, 'x').min(1).max(N).step(1);
+      f2.add(param, 'y').min(1).max(N).step(1);
+      f2.add(param, 'z').min(1).max(N).step(1);
+      f2.add(param, 'W').min(0).max(1000).step(1);
+      f2.add(param, 'updateValue').name('Actualizar elemento');
+
+      var f3 = gui.addFolder('Query');
+      f3.add(param, 'x1');
+      f3.add(param, 'y1');
+      f3.add(param, 'z1');
+      f3.add(param, 'x2');
+      f3.add(param, 'y2');
+      f3.add(param, 'z2');
+    }
+
     function dispatch( array, event ) {
       for ( var i = 0, l = array.length; i < l; i ++ ) {
         array[ i ]( event );
@@ -139,7 +173,6 @@ var APP = {
         console.error( ( e.message || e ), ( e.stack || "" ) );
       }
   
-      //camera.updateMatrixWorld();
       raycaster.setFromCamera( mouse, camera );
       var intersects = raycaster.intersectObjects( group.children );
       if ( intersects.length > 0 ) {
@@ -152,6 +185,7 @@ var APP = {
           document.getElementById("X").innerText = INTERSECTED['tag'].x;
           document.getElementById("Y").innerText = INTERSECTED['tag'].y;
           document.getElementById("Z").innerText = INTERSECTED['tag'].z;
+          document.getElementById("W").innerText = scope.elements[INTERSECTED['tag'].x][INTERSECTED['tag'].y][INTERSECTED['tag'].z].value;
         }
       } else {
         if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
@@ -162,19 +196,20 @@ var APP = {
       } catch (ex) { 
 
       }
+
+      //Actuliza los valores de los parametros
+      if (gui != undefined) {
+        for (var i in gui.__controllers) {
+          gui.__controllers[i].updateDisplay();
+        }      
+      }
+
       renderer.render( scene, camera );
       prevTime = time;
     }
 
     this.play = function () {
-      document.addEventListener( 'keydown', onDocumentKeyDown );
-      document.addEventListener( 'keyup', onDocumentKeyUp );
-      document.addEventListener( 'mousedown', onDocumentMouseDown );
-      document.addEventListener( 'mouseup', onDocumentMouseUp );
       document.addEventListener( 'mousemove', onDocumentMouseMove );
-      document.addEventListener( 'touchstart', onDocumentTouchStart );
-      document.addEventListener( 'touchend', onDocumentTouchEnd );
-      document.addEventListener( 'touchmove', onDocumentTouchMove );
 
       dispatch( events.start, arguments );
 
@@ -183,14 +218,7 @@ var APP = {
     };
 
     this.stop = function () {
-      document.removeEventListener( 'keydown', onDocumentKeyDown );
-      document.removeEventListener( 'keyup', onDocumentKeyUp );
-      document.removeEventListener( 'mousedown', onDocumentMouseDown );
-      document.removeEventListener( 'mouseup', onDocumentMouseUp );
       document.removeEventListener( 'mousemove', onDocumentMouseMove );
-      document.removeEventListener( 'touchstart', onDocumentTouchStart );
-      document.removeEventListener( 'touchend', onDocumentTouchEnd );
-      document.removeEventListener( 'touchmove', onDocumentTouchMove );
 
       dispatch( events.stop, arguments );
       cancelAnimationFrame( request );
@@ -206,20 +234,35 @@ var APP = {
       renderer = undefined;
     };
 
-    function onDocumentKeyDown( event ) {
-      dispatch( events.keydown, event );
-    }
+    this.changeMatrixSize = function() {
+      if ( group != undefined ) scene.remove( group );
 
-    function onDocumentKeyUp( event ) {
-      dispatch( events.keyup, event );
-    }
+      group = new THREE.Group();
+      scene.add( group );
+      this.elements = [];
 
-    function onDocumentMouseDown( event ) {
-      dispatch( events.mousedown, event );
-    }
-
-    function onDocumentMouseUp( event ) {
-      dispatch( events.mouseup, event );
+      for ( var x = 1; x <= N; x++ ) {
+        this.elements[x] = [];
+        for ( var y = 1; y <= N; y++ ) {
+          this.elements[x][y] = [];
+          for ( var z = 1; z <= N; z++ ) {
+            var clone = box.clone();
+            clone.material = box.material.clone();
+            clone.position.x = (x-1) * 2;
+            clone.position.y = -(y-1) * 2;
+            clone.position.z = -(z-1) * 2;
+            clone['tag'] = { x: x, y: y, z: z }
+            this.elements[x][y][z] = { box: clone, value: 0 };
+            group.add( this.elements[x][y][z].box );
+          }
+        }
+      }
+      this.elements[1][1][1].box.material.emissive.setHex( 0x00ff00 );
+      this.elements[N][N][N].box.material.emissive.setHex( 0x0000ff );
+      camera.position.x = this.elements[N][1][1].box.position.x * 2;
+      camera.position.z = this.elements[N][1][1].box.position.x * 2.25;
+      camera.position.y = -(this.elements[N][1][1].box.position.x/2)*1.45;
+      camera.lookAt( this.elements[N][1][1].box.position );
     }
 
     function onDocumentMouseMove( event ) {
@@ -227,18 +270,6 @@ var APP = {
       mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
       dispatch( events.mousemove, event );
-    }
-
-    function onDocumentTouchStart( event ) {
-      dispatch( events.touchstart, event );
-    }
-
-    function onDocumentTouchEnd( event ) {
-      dispatch( events.touchend, event );
-    }
-
-    function onDocumentTouchMove( event ) {
-      dispatch( events.touchmove, event );
     }
   }
 };
