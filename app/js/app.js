@@ -233,7 +233,7 @@ var APP = {
       try {
         dispatch( events.update, { time: time, delta: time - prevTime } );
       } catch ( e ) {
-        console.error( ( e.message || e ), ( e.stack || "" ) );
+        console.error( ( e.message || e ), ( e.stack || '' ) );
       }
   
       //Raycasting
@@ -249,10 +249,10 @@ var APP = {
             if (INTERSECTED.material.opacity > 0) {
               INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
               INTERSECTED.material.emissive.setHex( 0xff0000 );
-              document.getElementById("X").innerText = INTERSECTED['tag'].x;
-              document.getElementById("Y").innerText = INTERSECTED['tag'].y;
-              document.getElementById("Z").innerText = INTERSECTED['tag'].z;
-              document.getElementById("W").innerText = scope.elements[INTERSECTED['tag'].x][INTERSECTED['tag'].y][INTERSECTED['tag'].z].value;
+              document.getElementById('X').innerText = INTERSECTED['tag'].x;
+              document.getElementById('Y').innerText = INTERSECTED['tag'].y;
+              document.getElementById('Z').innerText = INTERSECTED['tag'].z;
+              document.getElementById('W').innerText = scope.elements[INTERSECTED['tag'].x][INTERSECTED['tag'].y][INTERSECTED['tag'].z].value;
               break;
             }
         }
