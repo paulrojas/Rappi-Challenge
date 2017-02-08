@@ -1,3 +1,14 @@
+dat.GUI.prototype.removeFolder = function(name) {
+  var folder = this.__folders[name];
+  if (!folder) {
+    return;
+  }
+  folder.close();
+  this.__ul.removeChild(folder.domElement.parentNode);
+  delete this.__folders[name];
+  this.onResize();
+}
+
 var GUIParams = function() {
   this.N = 4;
   this.x = 1;
@@ -19,7 +30,7 @@ var GUIParams = function() {
   }
 };
 
-var gui, param;
+var gui, param, f1, f2, f3;
 
 var APP = {
 
@@ -127,12 +138,16 @@ var APP = {
       gui = new dat.GUI();
 
       param = new GUIParams();
-      var f1 = gui.addFolder('Tamaño del cubo');
+      f1 = gui.addFolder('Tamaño del cubo');
       f1.add(param, 'N').min(2).max(20).step(1).onFinishChange( function(value){
         if (N != value) {
           if (confirm('Esta seguro de cambiar el tamaño del cubo. Si continúa se eliminarán todos los valores.')) {
             N = value;
             scope.changeMatrixSize();
+            gui.removeFolder('Update');
+            gui.removeFolder('Query');
+            scope.setGUI_Update();
+            scope.setGUI_Query();
           } else {
             param.N = N;
             value = N;
@@ -140,20 +155,39 @@ var APP = {
         }
       }).listen();
 
-      var f2 = gui.addFolder('Update');
+      scope.setGUI_Update();
+      scope.setGUI_Query();
+    }
+
+    this.setGUI_Update = function() {
+      f2 = gui.addFolder('Update');
       f2.add(param, 'x').min(1).max(N).step(1);
       f2.add(param, 'y').min(1).max(N).step(1);
-      f2.add(param, 'z').min(1).max(N).step(1);
+      f2.add(param, 'z').min(1).max(N).step(1).onFinishChange( function(value){
+        for( i=1; i<=N; i++ ) {
+          for( j=1; j<=N; j++ ) {
+            for(k=1; k<=N; k++ ) {
+              op = 1;
+              if (k < value) {
+                op = 0;
+              }
+              scope.elements[i][j][k].box.material.opacity = op;
+            }
+          }
+        }
+      });
       f2.add(param, 'W').min(0).max(1000).step(1);
       f2.add(param, 'updateValue').name('Actualizar elemento');
+    }
 
-      var f3 = gui.addFolder('Query');
-      f3.add(param, 'x1');
-      f3.add(param, 'y1');
-      f3.add(param, 'z1');
-      f3.add(param, 'x2');
-      f3.add(param, 'y2');
-      f3.add(param, 'z2');
+    this.setGUI_Query = function() {
+      f3 = gui.addFolder('Query');
+      f3.add(param, 'x1').min(1).max(N).step(1);
+      f3.add(param, 'y1').min(1).max(N).step(1);
+      f3.add(param, 'z1').min(1).max(N).step(1);
+      f3.add(param, 'x2').min(1).max(N).step(1);
+      f3.add(param, 'y2').min(1).max(N).step(1);
+      f3.add(param, 'z2').min(1).max(N).step(1);
     }
 
     function dispatch( array, event ) {
@@ -176,16 +210,19 @@ var APP = {
       raycaster.setFromCamera( mouse, camera );
       var intersects = raycaster.intersectObjects( group.children );
       if ( intersects.length > 0 ) {
-        if ( INTERSECTED != intersects[ 0 ].object ) {
-          if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+        for ( ix=0; ix<intersects.length; ix++ ) {
+            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-          INTERSECTED = intersects[ 0 ].object;
-          INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-          INTERSECTED.material.emissive.setHex( 0xff0000 );
-          document.getElementById("X").innerText = INTERSECTED['tag'].x;
-          document.getElementById("Y").innerText = INTERSECTED['tag'].y;
-          document.getElementById("Z").innerText = INTERSECTED['tag'].z;
-          document.getElementById("W").innerText = scope.elements[INTERSECTED['tag'].x][INTERSECTED['tag'].y][INTERSECTED['tag'].z].value;
+            INTERSECTED = intersects[ ix ].object;
+            if (INTERSECTED.material.opacity > 0) {
+              INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+              INTERSECTED.material.emissive.setHex( 0xff0000 );
+              document.getElementById("X").innerText = INTERSECTED['tag'].x;
+              document.getElementById("Y").innerText = INTERSECTED['tag'].y;
+              document.getElementById("Z").innerText = INTERSECTED['tag'].z;
+              document.getElementById("W").innerText = scope.elements[INTERSECTED['tag'].x][INTERSECTED['tag'].y][INTERSECTED['tag'].z].value;
+              break;
+            }
         }
       } else {
         if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
@@ -248,6 +285,7 @@ var APP = {
           for ( var z = 1; z <= N; z++ ) {
             var clone = box.clone();
             clone.material = box.material.clone();
+            clone.material.transparent = true;
             clone.position.x = (x-1) * 2;
             clone.position.y = -(y-1) * 2;
             clone.position.z = -(z-1) * 2;
