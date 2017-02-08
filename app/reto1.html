@@ -103,16 +103,13 @@
         player.load( json );
         player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
         player.play();
+        player.setGUI();
 
         document.body.appendChild( player.dom );
 
         window.addEventListener( 'resize', function () {
           player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
         } );
-
-        window.onload = function() {
-          player.setGUI();
-        }
       } );
     </script>
   </body>

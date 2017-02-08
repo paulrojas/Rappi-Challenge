@@ -242,7 +242,7 @@ var APP = {
       if ( intersects.length > 0 ) {
         document.getElementById('suma').style.display = 'none';
         document.getElementById('info').style.display='block';
-        for ( ix=0; ix<intersects.length; ix++ ) {
+        for (var ix=0; ix<intersects.length; ix++ ) {
             if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
             INTERSECTED = intersects[ ix ].object;
