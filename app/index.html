@@ -6,73 +6,107 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
       body {
         font-family: Helvetica, Arial, sans-serif;
-        font-size: 12px;
         background-color: #fff;
         margin: 0px;
       }
-      canvas { background-color: #f0f0f0; width: 100%; height: 100% }
-      #info {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        width: 250px;
-        height: 250px;
-        background-color: #cccccc;
-      }
-      .dg {
-        font-size: 12pt !important;
+      li {
+        font-size: 21px !important;
+        font-weight: 200;
       }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
-    <script src="./js/dat.gui.min.js"></script>
-    <script src="./js/control.js"></script>
-    <script src="./js/app.js"></script>
   </head>
-  <body ontouchstart="">
-    <div id="info">
-      <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">X</div>
-        <div id="X" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="./index.html">Home</a></li>
+          <li><a href="./reto1.html">Reto 1</a></li>
+          <li><a href="./reto2.html">Reto 2</a></li>
+          <li><a href="./reto3.html">Reto 3</a></li>
+        </ul>
       </div>
-      <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">Y</div>
-        <div id="Y" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
-      </div>
-      <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">Z</div>
-        <div id="Z" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
-      </div>
-      <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-center">W</div>
-        <div id="W" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">0</div>
-      </div>
-    </div>
-    <canvas id="scene"></canvas>
-    
-    <script>
-      var my_canvas, player;
-      var loader = new THREE.FileLoader();
-      loader.load( './js/app.json', function ( text ) {
-        var json = JSON.parse( text );
-        var my_canvas = document.getElementById( 'scene' );
-        player = new APP.Player();
-        player.load( json );
-        player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
-        player.play();
+    </nav>
+    <header>
+      <div id="row">
+        
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          
+        </div>
+        
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          
+          <div class="jumbotron">
+            <div class="container">
+              <img src="./images/logo-rappi2.png" width="100px" />
+              <h1>Rappi Challenge</h1>
+              <p>Esta es una prueba a nivel técnico para demostar que soy el "crack" que están buscando. ;)</p>
+              <p>Perfiles disponibles:<br>
+              <a href="http://stackoverflow.com/story/paulrojas" target="_blank"><i class="fa fa-stack-overflow" aria-hidden="true"></i> http://stackoverflow.com/story/paulrojas</a><br>
+              <a href="https://www.linkedin.com/in/rojaspaul/en" target="_blank"><i class="fa fa-linkedin-square" aria-hidden="true"></i> https://www.linkedin.com/in/rojaspaul/en</a><br>
+              </p>
+            </div>
+          </div>
 
-        document.body.appendChild( player.dom );
+          
+          <div class="jumbotron">
+            <div class="container">
+              <h1>Coding Challenge</h1>
+                <p>La primera parte de la prueba consiste en un Coding Challenge tomado de hackerrank. Lo
+                puede encontrar en el siguiente <a href="https://www.hackerrank.com/challenges/cube-summation" target="_blank">link</a>. Puede escribir el programa en el lenguaje de
+                programación en el que se sienta más cómodo, aunque se prefiere el uso de javascript o
+                PHP (En caso de ser PHP también es preferible el uso de Laravel). Puede usar cualquier
+                mecanismo para la entrada y salida de datos del programa.</p>
+              <p>
+                <a href="reto1.html" class="btn btn-primary btn-lg">Ver solución</a>
+              </p>
+              
+            </div>
+          </div>
 
-        window.addEventListener( 'resize', function () {
-          player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
-        } );
+          
+          <div class="jumbotron">
+            <div class="container">
+              <h1>Code Refactoring</h1>
+              <p>Refactorizar una funcíon y explicar:</p>
+              <p>
+              <ol><li>Las malas prácticas de programación que en su criterio son evidenciadas en el código</li>
+              <li>Cómo su refactorización supera las malas prácticas de programación</li></ol>
+              </p>
+              <p>
+                <a href="reto2.html" class="btn btn-primary btn-lg">Ver solución</a>
+              </p>
+            </div>
+          </div>
+          
+          <div class="jumbotron">
+            <div class="container">
+              <h1>Preguntas</h1>
+              <p>Responda las siguientes preguntas:</p>
+              <p>
+              <ol><li>¿ En qué consiste el principio de responsabilidad única ? ¿Cual es su propósito?</li>
+              <li>¿Que características tiene según su opinión “buen” código o código limpio?</li></ol>
+              </p>
+              <p>
+                <a href="reto3.html" class="btn btn-primary btn-lg">Ver solución</a>
+              </p>
+            </div>
+          </div>
 
-        window.onload = function() {
-          player.setGUI();
-        }
-      } );
-    </script>
+        </div>
+        
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <img style="float: left; position:fixed;" src="./images/stamp2.png" width="250px">
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </header>
   </body>
 </html>

@@ -26,7 +26,32 @@ var GUIParams = function() {
     player.elements[this.x][this.y][this.z].box.material.emissive.setHex( 0x00ffff );
   };
   this.queryValue = function() {
-
+    if (this.x1 > this.x2) {
+      alert('El valor de X1 debe ser menor o igual a X2');
+      return;
+    }
+    if (this.y1 > this.y2) {
+      alert('El valor de Y1 debe ser menor o igual a Y2');
+      return;
+    }
+    if (this.z1 > this.z2) {
+      alert('El valor de Z1 debe ser menor o igual a Z2');
+      return;
+    }
+    var suma = 0;
+    var innerHtml = '';
+    for( i=this.x1; i<=this.x2; i++ ) {
+      for( j=this.y1; j<=this.y2; j++ ) {
+        for(k=this.z1; k<=this.z2; k++ ) {
+          innerHtml += '<li class="list-group-item">[' + i + '][' + j + '][' + k + '] = ' + player.elements[i][j][k].value + '</li>';
+          suma += player.elements[i][j][k].value;
+        }
+      }
+    }
+    innerHtml += '<li class="list-group-item">Total suma = ' + suma + '</li>';
+    document.getElementById('ul-items').innerHTML = innerHtml;
+    document.getElementById('suma').style.display = 'block';
+    document.getElementById('info').style.display = 'none';
   }
 };
 
@@ -154,6 +179,7 @@ var APP = {
           }
         }
       }).listen();
+      f1.open();
 
       scope.setGUI_Update();
       scope.setGUI_Query();
@@ -178,6 +204,7 @@ var APP = {
       });
       f2.add(param, 'W').min(0).max(1000).step(1);
       f2.add(param, 'updateValue').name('Actualizar elemento');
+      f2.open();
     }
 
     this.setGUI_Query = function() {
@@ -188,6 +215,8 @@ var APP = {
       f3.add(param, 'x2').min(1).max(N).step(1);
       f3.add(param, 'y2').min(1).max(N).step(1);
       f3.add(param, 'z2').min(1).max(N).step(1);
+      f3.add(param, 'queryValue').name('Calcular suma de items');
+      f3.open();
     }
 
     function dispatch( array, event ) {
@@ -207,9 +236,12 @@ var APP = {
         console.error( ( e.message || e ), ( e.stack || "" ) );
       }
   
+      //Raycasting
       raycaster.setFromCamera( mouse, camera );
       var intersects = raycaster.intersectObjects( group.children );
       if ( intersects.length > 0 ) {
+        document.getElementById('suma').style.display = 'none';
+        document.getElementById('info').style.display='block';
         for ( ix=0; ix<intersects.length; ix++ ) {
             if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
@@ -227,6 +259,7 @@ var APP = {
       } else {
         if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
         INTERSECTED = null;
+        document.getElementById('info').style.display='none';
       }
       try {
         controls.update();
@@ -305,8 +338,8 @@ var APP = {
 
     function onDocumentMouseMove( event ) {
       event.preventDefault();
-      mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      mouse.x = ( event.clientX / scope.dom.clientWidth ) * 2 - 1;
+      mouse.y = - ( event.clientY / scope.dom.clientHeight ) * 2 + 1;
       dispatch( events.mousemove, event );
     }
   }

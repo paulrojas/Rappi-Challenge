@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <style>
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 12px;
+        background-color: #fff;
+        margin: 0px;
+      }
+      canvas { background-color: #f0f0f0; width: 100%; height: 100% }
+      .info {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 250px;
+        background-color: #cccccc;
+        display: none;
+      }
+      header {
+        height: 120px;
+        position: fixed;
+        width: 100%;   
+      }
+      li {
+        font-size: 21px !important;
+        font-weight: 200;
+      }
+      .dg.ac {
+        top: 60px !important;
+      }
+      .dg li{
+        font-size: 12pt !important;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+    <script src="./js/dat.gui.min.js"></script>
+    <script src="./js/control.js"></script>
+    <script src="./js/app.js"></script>
+  </head>
+  <body ontouchstart="">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li><a href="./index.html">Home</a></li>
+          <li class="active"><a href="./reto1.html">Reto 1</a></li>
+          <li><a href="./reto2.html">Reto 2</a></li>
+          <li><a href="./reto3.html">Reto 3</a></li>
+        </ul>
+      </div>
+    </nav>
+    <header>
+      <div id="row">
+        
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          
+        </div>
+        
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <img src="./images/logo-rappi2.png" width="100px" />
+        </div>
+        
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          
+        </div>
+        
+      </div>
+    </header>
+    <div id="info" class="info">
+      <div class="panel panel-primary">
+        <div class="panel-heading">Información del item seleccionado</div>
+
+        <ul class="list-group">
+          <li class="list-group-item"><span id="X" class="badge">0</span>Posición X</li>
+          <li class="list-group-item"><span id="Y" class="badge">0</span>Posición Y</li>
+          <li class="list-group-item"><span id="Z" class="badge">0</span>Posición Z</li>
+          <li class="list-group-item"><span id="W" class="badge">0</span>Valor</li>
+        </ul>
+      </div>
+    </div>
+    <div id="suma" class="info">
+      <div class="panel panel-primary">
+        <div class="panel-heading">Suma de los items seleccionado</div>
+
+        <ul class="list-group" id="ul-items">
+        </ul>
+      </div>
+    </div>    
+    <canvas id="scene"></canvas>
+    
+    <script>
+      var my_canvas, player;
+      var loader = new THREE.FileLoader();
+      loader.load( './js/app.json', function ( text ) {
+        var json = JSON.parse( text );
+        var my_canvas = document.getElementById( 'scene' );
+        player = new APP.Player();
+        player.load( json );
+        player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
+        player.play();
+
+        document.body.appendChild( player.dom );
+
+        window.addEventListener( 'resize', function () {
+          player.setSize( my_canvas.clientWidth, my_canvas.clientHeight );
+        } );
+
+        window.onload = function() {
+          player.setGUI();
+        }
+      } );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+    <style>
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #fff;
+        margin: 0px;
+      }
+      li {
+        font-size: 21px !important;
+        font-weight: 200;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./reto1.html">Reto 1</a></li>
+          <li class="active"><a href="./reto2.html">Reto 2</a></li>
+          <li><a href="./reto3.html">Reto 3</a></li>
+        </ul>
+      </div>
+    </nav>
+    <header>
+      <div id="row">
+        
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          
+        </div>
+        
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          
+          <div class="jumbotron">
+            <div class="container">
+              <h1>Code Refactoring</h1>
+              <p>Refactorizar una funcíon y explicar:</p>
+              <p>
+              <ol><li>Las malas prácticas de programación que en su criterio son evidenciadas en el código:<br>
+              <p class="text-success"><i>Inicialmente se detectaron varias inconformidades con el código presentado, ya que el nombre de la variable $id no era lo suficientemente explicito para identificar su uso.
+                Se recomienda siempre presumir que el código debe ser de fácil lectura por parte de otros miembros del equipo de desarrollo.<br><br>
+                De igual manera, el metodo update de la clase Servicio se estaba llamando 2 veces y se simplifico la estructura de estos llamdos.<br><br>
+              </i></p>
+              </li>
+              <li>Cómo su refactorización supera las malas prácticas de programación<br>
+              <p class="text-success"><i>El código propuesto es más fácil de leer, realiza un mayor número de validaciones para evitar realizar llamados adicionales. También se optimiza la cantidad de llamados a la clase Input,
+                ya que estos valores se almacenan al momento de ejecutarse la función.<br>
+                NOTA: Con mayor conocimiento acerca de la funcionalidad de las clasese Servicios, Driver y Push es posible mejorar el código propuesto.</i>
+              </p>
+              </li></ol>
+              </p>
+            </div>
+          </div>
+          
+          <pre><code class="php">
+/******
+Autor: Paul Rojas
+Fecha: 01/07/2017 (mm/dd/yyy)
+Descripcion:
+1. Recibe dos parámetros por POST: El id de un servicio, el id de un conductor
+2. Cambia el estado de varias entidades en la base de datos basado en la lógica del negocio.
+3. Envía notificaciones y retorna una respuesta.
+*******/
+public function post_confirm() {
+    $service_id = Input::get('service_id'); //Se cambió el nombre de la variable
+    $driver_id = Input::get('driver_id');
+
+    //Se valida el valor del $service_id antes de llamar al servicio
+    if ( $service_id != NULL && $driver_id != NULL) { 
+        $servicio = Service::find($service_id);
+        if ( $servicio != NULL ) {
+            if ( $servicio->status_id == '6' ) {
+                return Response::json(array('error' => '2'));
+            }
+            if ( $servicio->driver_id == NULL && $servicio->status_id == '1' ) {
+                $driver = Driver::update($driver_id, array(
+                            'available' => '0'
+                ));
+                if ( $driver != NULL ) {
+                    $servicio = Service::update($service_id, array(
+                                'driver_id' => $driver_id,
+                                'status_id' = '2',
+                                'car_id' => $driver->car_id
+                    ));
+                    $pushMessage = 'Tu servicio ha sido confirmado!';
+                    $push = Push::make();
+                    if ( $servicio->user->uuid == '') {
+                        return Response::json(array('error' => '0'));  //Porque retornar 0, si aqui no se envio la notificacion al usuario
+                    }
+                    if ( $servicio->user->type == '1') { //iPhone
+                        $result = $push->ios($servicio->user->uuid, $pushMessage, 1, 'honk.wav', 'Open', array('serviceId' => $service_id));
+                    } else {
+                        $result = $push->android2($servicio->user->uuid, $pushMessage, 1, 'default', 'Open', array('serviceId' => $service_id));
+                    }
+                    return Response::json(array('error' => '0')); //Porque retornar 0
+                } else {
+                    return Response::json(array('error' => '3')); //Decribir cual es el error 3
+                }
+            } else {
+                return Response::json(array('error' => '1')); //Decribir cual es el error 1
+            }
+        } else {
+            return Response::json(array('error' => '3')); //Decribir cual es el error 3
+        }
+
+    } else {
+        return Response::json(array('error' => '3')); //Decribir cual es el error 3
+    }
+
+}            
+          </code></pre>
+          
+        </div>
+        
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+              <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <img style="float: left; position:fixed;" src="./images/stamp2.png" width="250px">
+                </div>
+              </div>
+        </div>
+        
+      </div>
+    </header>
+  </body>
+  <script>hljs.initHighlightingOnLoad();</script>
+</html>
