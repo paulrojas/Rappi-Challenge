@@ -16,11 +16,23 @@
       canvas { background-color: #f0f0f0; width: 100%; height: 100% }
       .info {
         position: fixed;
-        top: 20px;
+        top: 40px;
         left: 20px;
         width: 250px;
         background-color: #cccccc;
         display: none;
+        max-height: 600px;
+        overflow-y: scroll;        
+      }
+      .suma {
+        position: fixed;
+        top: 240px;
+        left: 20px;
+        width: 250px;
+        background-color: #cccccc;
+        display: none;
+        max-height: 400px;
+        overflow-y: scroll;        
       }
       header {
         height: 120px;
@@ -83,7 +95,7 @@
         </ul>
       </div>
     </div>
-    <div id="suma" class="info">
+    <div id="suma" class="suma">
       <div class="panel panel-primary">
         <div class="panel-heading">Suma de los items seleccionado</div>
 

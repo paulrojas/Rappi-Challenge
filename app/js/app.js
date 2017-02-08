@@ -40,9 +40,9 @@ var GUIParams = function() {
     }
     var suma = 0;
     var innerHtml = '';
-    for( i=this.x1; i<=this.x2; i++ ) {
-      for( j=this.y1; j<=this.y2; j++ ) {
-        for(k=this.z1; k<=this.z2; k++ ) {
+    for( var i=this.x1; i<=this.x2; i++ ) {
+      for( var j=this.y1; j<=this.y2; j++ ) {
+        for( var k=this.z1; k<=this.z2; k++ ) {
           innerHtml += '<li class="list-group-item">[' + i + '][' + j + '][' + k + '] = ' + player.elements[i][j][k].value + '</li>';
           suma += player.elements[i][j][k].value;
         }
@@ -190,9 +190,9 @@ var APP = {
       f2.add(param, 'x').min(1).max(N).step(1);
       f2.add(param, 'y').min(1).max(N).step(1);
       f2.add(param, 'z').min(1).max(N).step(1).onFinishChange( function(value){
-        for( i=1; i<=N; i++ ) {
-          for( j=1; j<=N; j++ ) {
-            for(k=1; k<=N; k++ ) {
+        for( var i=1; i<=N; i++ ) {
+          for( var j=1; j<=N; j++ ) {
+            for( var k=1; k<=N; k++ ) {
               op = 1;
               if (k < value) {
                 op = 0;
